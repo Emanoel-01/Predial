@@ -1,0 +1,166 @@
+@if (isOpen()) {
+<div class="fixed inset-0 bg-black bg-opacity-75 z-40 flex justify-center items-center p-4" (click)="onClose()">
+  <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 flex flex-col" (click)="$event.stopPropagation()">
+    <header class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold text-gray-200 flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-teal-400"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 0 0 9 22a4 4 0 0 0 5-4.815a4 4 0 0 0 .556-6.588 4 4 0 0 0-2.526-5.77A3 3 0 0 0 12 5Z"/><path d="M12 5a3 3 0 1 0 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 0 1 15 22a4 4 0 0 1-5-4.815a4 4 0 0 1-.556-6.588 4 4 0 0 1 2.526-5.77A3 3 0 0 1 12 5Z"/><path d="M12 9a1 1 0 1 0-2 0v2a1 1 0 1 0 2 0Z"/><path d="M12 13a1 1 0 1 0-2 0v2a1 1 0 1 0 2 0Z"/><path d="m15.5 6.5 1-1"/><path d="m18.5 9.5 1-1"/><path d="m18.5 14.5 1 1"/><path d="m15.5 17.5 1 1"/><path d="m8.5 6.5-1-1"/><path d="m5.5 9.5-1-1"/><path d="m5.5 14.5-1 1"/><path d="m8.5 17.5-1 1"/></svg>
+        Diagnóstico por Imagem
+      </h2>
+      <button (click)="onClose()" class="text-gray-400 hover:text-white transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </header>
+    <div class="flex-grow overflow-y-auto pr-2">
+      @if (isCameraOpen()) {
+        <div class="flex flex-col items-center justify-center gap-4">
+            <h3 class="text-lg font-medium text-gray-200">Câmera Ativa</h3>
+            <div class="w-full max-w-lg rounded-lg overflow-hidden border-4 border-gray-600">
+              <video #videoElement autoplay playsinline class="w-full h-auto"></video>
+            </div>
+            <div class="flex gap-4">
+              <button (click)="captureImage()" class="bg-teal-400 text-black font-bold py-3 px-6 rounded-lg hover:bg-teal-500 transition-colors">
+                Capturar Foto
+              </button>
+              <button (click)="closeCamera()" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-500 transition-colors">
+                Cancelar
+              </button>
+            </div>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+          <div class="flex flex-col gap-4">
+            <div class="space-y-4 p-4 border border-gray-700 rounded-lg bg-gray-900">
+              <h3 class="font-semibold text-gray-200 text-lg">1. Selecione o Componente</h3>
+              <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-1">Categoria *</label>
+                  <select (change)="onCategoryChange($event)" class="input-field w-full">
+                      <option value="" disabled [selected]="!selectedCategoryKey()">Selecione uma categoria...</option>
+                      @for(cat of categories(); track cat.key) {
+                        <option [value]="cat.key">{{ cat.title }}</option>
+                      }
+                  </select>
+              </div>
+              @if(selectedCategoryKey()) {
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Sistema *</label>
+                    <select (change)="onSystemChange($event)" class="input-field w-full">
+                        <option value="" disabled [selected]="!selectedSystemKey()">Selecione um sistema...</option>
+                        @for(sys of systems(); track sys.key) {
+                          <option [value]="sys.key">{{ sys.title }}</option>
+                        }
+                    </select>
+                </div>
+              }
+               @if(selectedSystemKey()) {
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Tipologia / Componente *</label>
+                    <select (change)="onTypologyChange($event)" class="input-field w-full">
+                        <option value="" disabled [selected]="!selectedTypologyTitle()">Selecione uma tipologia...</option>
+                        @for(typo of typologies(); track typo.title) {
+                          <option [value]="typo.title">{{ typo.title }}</option>
+                        }
+                    </select>
+                </div>
+              }
+            </div>
+            
+            <div class="space-y-3 p-4 border border-gray-700 rounded-lg bg-gray-900">
+              <h3 class="font-semibold text-gray-200 text-lg">2. Anexe as Imagens (até {{MAX_IMAGES}})</h3>
+              <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                @for(image of images(); track $index) {
+                  <div class="relative group">
+                    <img [src]="image.preview" alt="Pré-visualização" class="w-full h-24 object-cover rounded-md">
+                    <button (click)="removeImage($index)" class="absolute top-1 right-1 bg-black bg-opacity-60 text-white rounded-full p-1 leading-none opacity-0 group-hover:opacity-100 transition-opacity">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                  </div>
+                }
+              </div>
+              @if (images().length < MAX_IMAGES) {
+                 <div class="flex flex-wrap justify-center gap-3 pt-2">
+                    <label for="file-upload" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg cursor-pointer hover:bg-indigo-700 transition-colors">
+                      Selecionar da Galeria
+                      <input id="file-upload" name="file-upload" type="file" class="sr-only" (change)="onFileSelected($event)" accept="image/*" multiple>
+                    </label>
+                    <button (click)="openCamera()" class="bg-indigo-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-600 transition-colors">
+                      Tirar Foto com a Câmera
+                    </button>
+                 </div>
+              } @else {
+                 <p class="text-center text-sm text-teal-400">Limite de {{MAX_IMAGES}} imagens atingido.</p>
+              }
+              @if(cameraError()) {
+                <p class="text-sm text-red-500 mt-2 text-center">{{ cameraError() }}</p>
+              }
+            </div>
+            
+            <button (click)="runDiagnosis()" [disabled]="!isDiagnosisReady() || geminiService.loading()" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-500 disabled:text-gray-300 disabled:cursor-not-allowed flex items-center justify-center">
+              @if (geminiService.loading()) {
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <span>Analisando...</span>
+              } @else {
+                <span>Executar Diagnóstico</span>
+              }
+            </button>
+          </div>
+          <div class="bg-gray-900 p-4 rounded-lg border border-gray-700 min-h-[200px] max-h-[70vh] overflow-y-auto flex flex-col">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-bold text-indigo-400">Resultado da Análise</h3>
+              @if (diagnosisResult()) {
+                <button (click)="generatePDF()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded-lg text-sm flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                  PDF
+                </button>
+              }
+            </div>
+            <div class="flex-grow">
+              @if (geminiService.loading() && !diagnosisResult()) {
+                <div class="text-center text-gray-400 pt-8">
+                  <p>Processando imagens e gerando diagnóstico...</p>
+                </div>
+              } @else if (diagnosisResult()) {
+                <div class="prose prose-sm prose-invert max-w-none" [innerHTML]="diagnosisResult()"></div>
+              } @else {
+                <div class="text-center text-gray-400 pt-8">
+                  <p>O resultado da análise da IA aparecerá aqui.</p>
+                </div>
+              }
+            </div>
+             @if(relatedPathologies().length > 0) {
+              <div class="mt-4 pt-4 border-t border-gray-700 animate-fade-in">
+                  <h4 class="font-semibold text-teal-400 mb-2 flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                      Patologias Relacionadas (Base de Conhecimento)
+                  </h4>
+                  <div class="space-y-3">
+                      @for(pathology of relatedPathologies(); track pathology.title) {
+                          <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                              <p class="font-bold text-gray-200">{{ pathology.title }}</p>
+                              <p class="text-sm text-gray-400 mt-1"><strong>Sintomas Típicos:</strong> {{ pathology.sintomas }}</p>
+                              <p class="text-sm text-gray-400 mt-1"><strong>Causas Comuns:</strong> {{ pathology.causas }}</p>
+                          </div>
+                      }
+                  </div>
+                  <p class="text-xs text-gray-500 mt-3 text-center"><i>Esta é uma referência da base de dados. Compare com a análise da IA.</i></p>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+}
+
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  .input-field {
+    @apply w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500;
+  }
+</style>

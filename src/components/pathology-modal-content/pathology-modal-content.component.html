@@ -1,0 +1,62 @@
+ @if (pathology(); as p) {
+<div class="space-y-4">
+  <div>
+    <h4 class="font-bold text-gray-200">Sintomas</h4>
+    <p>{{ p.sintomas }}</p>
+  </div>
+  <div>
+    <h4 class="font-bold text-gray-200">Causas Comuns</h4>
+    <p>{{ p.causas }}</p>
+  </div>
+  <hr class="my-4 border-gray-700" />
+  <div class="bg-gray-900 p-4 rounded-lg">
+    <div class="flex justify-between items-center mb-2">
+      <h4 class="font-bold text-gray-200">Assistente de Manutenção IA</h4>
+      <button (click)="generateReportPDF()" 
+              [disabled]="!actionPlan()"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded-lg text-sm flex items-center gap-2 disabled:bg-gray-500 disabled:cursor-not-allowed"
+              title="Gerar Relatório em PDF (inclui Plano de Ação e Orçamento, se gerado)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          Relatório PDF
+      </button>
+    </div>
+    <p class="text-sm text-gray-400 mb-3">Gera um plano de ação e um orçamento preliminar para as patologias dos sistemas prediais.</p>
+    <div class="space-y-4">
+      <div>
+        <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:bg-gray-600 flex justify-center items-center" 
+                (click)="generateActionPlan()" [disabled]="loadingPlan() || loadingBudget()">
+          @if (loadingPlan()) {
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <span>Criando plano de ação...</span>
+          } @else {
+            <span>1. Gerar Plano de Ação</span>
+          }
+        </button>
+        @if (actionPlan()) {
+          <div class="mt-2 bg-gray-800 p-4 rounded-b-lg shadow-inner border border-t-0 border-gray-700 prose prose-invert max-w-none"
+               [innerHTML]="actionPlan()">
+          </div>
+        }
+      </div>
+      @if (actionPlan()) {
+        <div>
+          <button class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:bg-gray-600 flex justify-center items-center" 
+                  [disabled]="loadingBudget() || loadingPlan()" (click)="generatePreliminaryBudget()">
+             @if (loadingBudget()) {
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <span>Calculando estimativa...</span>
+             } @else {
+              <span>2. Gerar Orçamento Estimativo</span>
+             }
+          </button>
+          @if (budget()) {
+            <div class="mt-2 bg-gray-800 p-4 rounded-b-lg shadow-inner border border-t-0 border-gray-700 prose prose-invert max-w-none [&_table]:w-full [&_td]:p-2 [&_th]:p-2"
+                 [innerHTML]="budget()">
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+}

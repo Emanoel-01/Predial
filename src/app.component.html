@@ -1,0 +1,135 @@
+@if(isLoggedIn()) {
+  <!-- Backdrop for mobile sidebar -->
+  @if(isSidebarOpen()) {
+    <div (click)="isSidebarOpen.set(false)" class="fixed inset-0 bg-black/60 z-20 md:hidden"></div>
+  }
+
+  <div class="flex h-screen overflow-hidden bg-gray-900 text-gray-200 font-sans">
+    <!-- Sidebar -->
+    <aside 
+      class="fixed inset-y-0 left-0 z-30 w-64 flex-shrink-0 bg-gray-800 p-5 flex flex-col border-r border-gray-700 transition-transform duration-300 ease-in-out md:relative md:translate-x-0"
+      [class]="isSidebarOpen() ? 'translate-x-0' : '-translate-x-full'">
+      <div class="flex items-center gap-3 mb-8">
+        <svg class="w-10 h-10 text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 9l4 3v10h14V12l4-3-11-7zm0 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+        <div>
+          <h1 class="text-xl font-bold text-white">Gestor Predial</h1>
+          <span class="text-sm text-indigo-300">4.0</span>
+        </div>
+      </div>
+      <nav class="flex-grow space-y-2">
+        @for(item of navItems; track item.id) {
+          <button (click)="setActiveView(item.id)"
+                  [class]="'w-full text-left px-4 py-2.5 rounded-lg transition-colors flex items-center ' + (activeView() === item.id ? 'bg-indigo-600 text-white' : 'hover:bg-gray-700 text-gray-300')">
+            {{ item.label }}
+          </button>
+        }
+      </nav>
+      <div class="mt-6 border-t border-gray-700 pt-6 space-y-3">
+         <div class="px-4 py-3 bg-gray-700/50 rounded-lg">
+          <p class="text-sm text-gray-400">Logado como</p>
+          <p class="font-semibold text-white truncate">{{ userProfile()?.fullName }}</p>
+         </div>
+         <button (click)="isNotificationsModalOpen.set(true)" class="relative w-full text-left px-4 py-2.5 rounded-lg transition-colors hover:bg-gray-700 text-gray-300 flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+            <span>Notificações</span>
+            @if (hasUnreadNotifications()) {
+              <span class="absolute left-8 top-2 w-2.5 h-2.5 bg-indigo-400 rounded-full border-2 border-gray-800 animate-pulse"></span>
+            }
+         </button>
+         <button (click)="isProfileModalOpen.set(true)" class="w-full text-left px-4 py-2.5 rounded-lg transition-colors hover:bg-gray-700 text-gray-300 flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>Meu Perfil</span>
+         </button>
+         <button (click)="logout()" class="w-full text-left px-4 py-2.5 rounded-lg transition-colors hover:bg-gray-700 text-gray-300 flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Sair</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="main-content" class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <header class="sticky top-0 bg-gray-900/70 backdrop-blur-sm z-10 border-b border-gray-700 p-4 md:p-6 flex justify-between items-center">
+          <div class="flex items-center gap-4">
+            <button (click)="isSidebarOpen.set(true)" class="p-1 text-gray-300 hover:text-white md:hidden" aria-label="Abrir menu">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </button>
+            <div>
+              <h1 class="text-xl md:text-2xl font-bold text-white leading-tight flex items-baseline">
+                Gestor Predial
+                <span class="text-lg md:text-xl font-bold text-indigo-400 ml-2">4.0</span>
+              </h1>
+              <p class="text-sm text-gray-400 hidden sm:block">Olá, {{ userName() }}!</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap justify-end">
+               <button (click)="isChatModalOpen.set(true)" class="action-button-sm" title="Assistente de Chat">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3c-4.97 0-9 3.582-9 8s4.03 8 9 8c1.398 0 2.72-.303 3.932-.853c.125.437.293.86.505 1.267c.212.406.467.796.764 1.168c.298.372.633.72.998 1.042c.365.323.754.615 1.15.868c.395.253.801.46 1.205.614c-.318.494-.65.98-1.002 1.453A10.95 10.95 0 0 1 12 23c-6.075 0-11-4.477-11-10S5.925 3 12 3s11 4.477 11 10c0 1.29-.224 2.527-.643 3.678c-.067-.28-.14-.557-.22-.832c-.08-.275-.164-.548-.255-.818c-.09-.27-.185-.537-.285-.8c-.1-.263-.205-.523-.314-.776c-.11-.253-.223-.502-.34-.744a7.938 7.938 0 0 0-3.143-3.654A8.02 8.02 0 0 0 12 11c-4.418 0-8-3.134-8-7s3.582-7 8-7s8 3.134 8 7c0 1.432-.475 2.766-1.293 3.882c.245.247.48.502.704.766c.224.263.436.533.633.81c.198.277.382.56.55.85c.168.29.318.586.453.885c.135.3.253.602.354.907c.1.305.184.61.248.914A10.954 10.954 0 0 1 23 11c0-4.418-3.582-8-8-8z"/></svg>
+              </button>
+              <button (click)="isDiagnosisModalOpen.set(true)" class="action-button" title="Diagnóstico por Imagem">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>
+                  <span class="hidden sm:inline ml-2">Diagnóstico por Imagem</span>
+              </button>
+              <button (click)="isInspectionModalOpen.set(true)" class="action-button" title="Assistente de Inspeção">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                  <span class="hidden sm:inline ml-2">Checklist de Vistoria</span>
+              </button>
+              <button (click)="isTechDiagnosisModalOpen.set(true)" class="action-button" title="Assistente de Diagnóstico e Correção">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                  <span class="hidden sm:inline ml-2">Diagnóstico Técnico</span>
+              </button>
+              <button (click)="isMaintenanceScheduleModalOpen.set(true)" class="action-button" title="Cronograma de Manutenção">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                  <span class="hidden sm:inline ml-2">Agendar Manutenção</span>
+              </button>
+          </div>
+      </header>
+      <div class="p-4 sm:p-6 md:p-8 flex-grow">
+        <div class="max-w-7xl mx-auto">
+          @switch (activeView()) {
+            @case ('visao-geral') {
+              <app-visao-geral (openToolModal)="handleOpenTool($event)" />
+            }
+            @case ('estrutura') {
+              <app-system-category categoryKey="estrutura" [userProfile]="userProfile()" />
+            }
+            @case ('instalacoes') {
+              <app-system-category categoryKey="instalacoes" [userProfile]="userProfile()" />
+            }
+            @case ('seguranca') {
+              <app-system-category categoryKey="seguranca" [userProfile]="userProfile()" />
+            }
+            @case ('externas') {
+              <app-system-category categoryKey="externas" [userProfile]="userProfile()" />
+            }
+            @default {
+              <p>View not found</p>
+            }
+          }
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <app-image-diagnosis-modal [isOpen]="isDiagnosisModalOpen()" (closeModal)="isDiagnosisModalOpen.set(false)" [userProfile]="userProfile()" />
+  <app-inspection-assistant-modal [isOpen]="isInspectionModalOpen()" (closeModal)="isInspectionModalOpen.set(false)" [userProfile]="userProfile()" />
+  <app-tech-diagnosis-modal [isOpen]="isTechDiagnosisModalOpen()" (closeModal)="isTechDiagnosisModalOpen.set(false)" [userProfile]="userProfile()" />
+  <app-maintenance-schedule-modal [isOpen]="isMaintenanceScheduleModalOpen()" (closeModal)="isMaintenanceScheduleModalOpen.set(false)" [userProfile]="userProfile()" />
+  <app-user-profile-modal [isOpen]="isProfileModalOpen()" (profileUpdate)="onProfileUpdate($event)" [userProfile]="userProfile()" (closeModal)="isProfileModalOpen.set(false)" />
+  <app-chat-assistant-modal [isOpen]="isChatModalOpen()" (closeModal)="isChatModalOpen.set(false)" />
+  <app-notifications-modal [isOpen]="isNotificationsModalOpen()" (closeModal)="isNotificationsModalOpen.set(false)" [notifications]="notifications()" (markAsRead)="markNotificationAsRead($event)" />
+} @else {
+  <app-login (loginSuccess)="handleLogin()"></app-login>
+}
+
+<app-toast></app-toast>
+
+<style>
+.action-button {
+ @apply bg-indigo-600 text-white font-semibold py-2 px-3 sm:px-4 rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center;
+}
+.action-button-sm {
+ @apply bg-gray-700 text-gray-200 font-semibold p-2 rounded-lg hover:bg-gray-600 transition-colors;
+}
+</style>

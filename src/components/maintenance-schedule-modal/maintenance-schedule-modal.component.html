@@ -1,0 +1,120 @@
+@if (isOpen()) {
+<div class="fixed inset-0 bg-black bg-opacity-75 z-40 flex justify-center items-center p-4" (click)="onClose()">
+  <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] flex flex-col p-0" (click)="$event.stopPropagation()">
+    <header class="p-6 border-b border-gray-700 flex flex-row justify-between items-start sticky top-0 bg-gray-800 z-10">
+      <h2 class="text-2xl font-bold text-gray-200 flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg>
+        Cronograma de Manutenção
+      </h2>
+      <button (click)="onClose()" class="text-gray-400 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+    </header>
+
+    <div class="flex-grow overflow-y-auto p-6">
+      <div class="grid md:grid-cols-2 gap-x-8 gap-y-6">
+        <div class="md:col-span-2 grid md:grid-cols-2 gap-x-8 gap-y-4 p-4 border border-gray-700 rounded-lg bg-gray-900">
+          <div>
+            <label class="block text-sm font-bold text-gray-300 mb-1">Nome do Edifício *</label>
+            <input [ngModel]="formData().buildingName" (ngModelChange)="updateFormData('buildingName', $event)" id="buildingName" placeholder="Ex: Edifício Central Park" class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-gray-300 mb-1">Endereço *</label>
+            <input [ngModel]="formData().address" (ngModelChange)="updateFormData('address', $event)" id="address" placeholder="Ex: Av. Principal, 123, Centro" class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div class="space-y-4 p-4 border border-gray-700 rounded-lg">
+          <h3 class="font-bold text-lg text-gray-200 border-b border-gray-700 pb-2">Selecione os Sistemas e Tipologias *</h3>
+          <div class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+            @for (category of systemOptions(); track category.id) {
+              <div>
+                <h4 class="font-semibold text-gray-200 bg-gray-700 p-2 rounded-t-md sticky top-0">{{ category.label }}</h4>
+                <div class="p-3 border border-gray-700 border-t-0 rounded-b-md space-y-3">
+                  @for (system of category.systems; track system.id) {
+                    <div>
+                      <h5 class="font-medium text-gray-300 mb-2">{{ system.label }}</h5>
+                      <div class="space-y-2 pl-4">
+                        @for (typology of system.typologies; track typology.id) {
+                          <div class="flex items-center space-x-2">
+                            <input type="checkbox"
+                                   #checkbox
+                                   [id]="system.id + '-' + typology.id"
+                                   [checked]="selectedSystems()[system.id]?.[typology.id]"
+                                   (change)="handleSystemChange(system.id, typology.id, checkbox.checked)"
+                                   class="h-4 w-4 rounded border-gray-500 bg-gray-600 text-indigo-500 focus:ring-indigo-600 cursor-pointer">
+                            <label [for]="system.id + '-' + typology.id" class="text-sm font-normal text-gray-300 cursor-pointer">
+                              {{ typology.label }}
+                            </label>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+          <div class="mt-4 pt-4 border-t border-gray-700">
+              <button (click)="generatePeriodicitySuggestions()" [disabled]="!areSystemsSelected() || loadingSuggestions()"
+                      class="w-full bg-teal-400 hover:bg-teal-500 text-black font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center disabled:bg-gray-500 disabled:text-gray-300 disabled:cursor-not-allowed">
+                  @if (loadingSuggestions()) {
+                      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                      <span>Analisando dados para sugestão...</span>
+                  } @else {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      <span>Sugerir Periodicidade Ideal</span>
+                  }
+              </button>
+
+              @if (suggestionsResult() && parsedSuggestions().length > 0) {
+                  <div class="mt-4 p-3 bg-gray-700 border border-gray-600 rounded-lg space-y-2 max-h-[200px] overflow-y-auto">
+                      <h4 class="font-semibold text-gray-200">Sugestões da IA:</h4>
+                      <ul class="list-disc list-inside space-y-1 text-sm text-gray-300">
+                          @for (suggestion of parsedSuggestions(); track suggestion.typology) {
+                              <li><strong>{{ suggestion.typology }}:</strong> {{ suggestion.periodicity }} - {{ suggestion.justification }}</li>
+                          }
+                      </ul>
+                  </div>
+              }
+          </div>
+        </div>
+
+        <div class="space-y-4 p-4 border border-gray-700 rounded-lg flex flex-col">
+          <div class="flex justify-between items-center border-b border-gray-700 pb-2">
+             <h3 class="font-bold text-lg text-gray-200">Cronograma Gerado</h3>
+             @if(scheduleResult()) {
+               <button (click)="generatePDF()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded-lg text-sm flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                  PDF
+               </button>
+             }
+          </div>
+          <div class="flex-grow bg-gray-900 p-4 rounded-lg min-h-[400px] border border-gray-700 overflow-y-auto">
+            @if (loading()) {
+              <div class="flex items-center justify-center h-full">
+                <svg class="animate-spin h-8 w-8 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <p class="ml-4 text-gray-300">Criando cronograma detalhado...</p>
+              </div>
+            } @else if (scheduleResult()) {
+              <div class="prose prose-invert max-w-none [&_table]:text-gray-300 [&_th]:text-gray-200" [innerHTML]="scheduleResult()"></div>
+            } @else {
+              <p class="text-center text-gray-400 p-4">Seu cronograma de manutenção aparecerá aqui após o preenchimento dos dados e a geração.</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="p-6 border-t border-gray-700 bg-gray-800/70 backdrop-blur-sm">
+      <button (click)="generateMaintenanceSchedule()" [disabled]="loading() || !isFormValid()"
+              class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 text-base rounded-lg transition-colors flex items-center justify-center disabled:bg-gray-500 disabled:text-gray-300 disabled:cursor-not-allowed">
+        @if (loading()) {
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          <span>Gerando Cronograma...</span>
+        } @else {
+          <span>Gerar Cronograma</span>
+        }
+      </button>
+    </div>
+  </div>
+</div>
+}

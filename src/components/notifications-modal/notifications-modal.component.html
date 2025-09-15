@@ -1,0 +1,45 @@
+@if (isOpen()) {
+<div class="fixed inset-0 bg-black bg-opacity-75 z-40 flex justify-center items-center p-4" (click)="onClose()">
+  <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col" (click)="$event.stopPropagation()">
+    <header class="flex justify-between items-center p-6 border-b border-gray-700">
+      <h2 class="text-2xl font-bold text-gray-200 flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+        Notificações
+      </h2>
+      <button (click)="onClose()" class="text-gray-400 hover:text-white transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </header>
+    <div class="flex-grow p-4 overflow-y-auto">
+      @if(notifications().length > 0) {
+        <div class="space-y-4">
+          @for(notification of notifications(); track notification.id) {
+            <div [class]="'p-4 rounded-lg border flex gap-4 transition-colors ' + (notification.read ? 'bg-gray-800/50 border-gray-700' : 'bg-indigo-900/30 border-indigo-700')">
+              <div class="text-2xl pt-1">{{ notification.icon }}</div>
+              <div class="flex-grow">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h3 class="font-bold text-gray-100">{{ notification.title }}</h3>
+                    <p class="text-xs text-gray-400">{{ notification.date }}</p>
+                  </div>
+                  @if (!notification.read) {
+                    <button (click)="onMarkAsRead(notification.id)" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold" title="Marcar como lida">
+                      Marcar como lida
+                    </button>
+                  }
+                </div>
+                <p class="text-sm text-gray-300 mt-2">{{ notification.content }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="text-center py-12 text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+          <p class="mt-2">Nenhuma notificação nova.</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+}

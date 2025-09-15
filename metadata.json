@@ -1,0 +1,8 @@
+{
+  "name": "Gestor Predial  4.0 (versão final) 10/09 AA",
+  "description": "Um aplicativo gratuito de gestão de manutenção predial, que oferece assistentes com inteligência artificial para inspeção, diagnósticos técnicos, checklists e agendamento de manutenção, auxiliando órgãos públicos na gestão de seus ativos",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

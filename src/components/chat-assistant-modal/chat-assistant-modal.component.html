@@ -1,0 +1,94 @@
+@if (isOpen()) {
+<div class="fixed inset-0 bg-black bg-opacity-75 z-40 flex justify-center items-center p-4" (click)="onClose()">
+  <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl h-[80vh] flex flex-col" (click)="$event.stopPropagation()">
+    <header class="flex justify-between items-center p-6 border-b border-gray-700">
+      <h2 class="text-2xl font-bold text-gray-200 flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        Assistente de Chat
+      </h2>
+      <button (click)="onClose()" class="text-gray-400 hover:text-white transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </header>
+
+    <div #chatContainer class="flex-grow p-4 overflow-y-auto bg-gray-900/50">
+      <div class="space-y-6">
+        @for (message of messages(); track $index; let isLast = $last) {
+          @if (message.role === 'assistant') {
+            <div class="flex items-start gap-3 animate-fade-in">
+              <div class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              </div>
+              <div class="bg-gray-700 rounded-lg p-3 max-w-lg">
+                @if (loading() && isLast) {
+                   <div class="flex items-center gap-2 text-gray-400">
+                      <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></div>
+                      <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></div>
+                      <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                   </div>
+                } @else {
+                  <div class="prose prose-sm prose-invert max-w-none text-gray-200" [innerHTML]="message.content"></div>
+                }
+              </div>
+            </div>
+          }
+          @if (message.role === 'user') {
+            <div class="flex justify-end items-start gap-3 animate-fade-in">
+              <div class="bg-indigo-600 text-white rounded-lg p-3 max-w-lg">
+                <p>{{ message.content }}</p>
+              </div>
+              <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-200"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+    
+    <div class="p-4 border-t border-gray-700 bg-gray-800">
+        <div class="flex items-center gap-2">
+            <textarea
+                rows="1"
+                class="flex-grow bg-gray-700 text-gray-200 rounded-lg py-2 px-3 resize-none focus:ring-2 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-600"
+                placeholder="Digite sua pergunta..."
+                [value]="userInput()"
+                (input)="userInput.set($event.target.value)"
+                (keydown.enter)="!$event.shiftKey && sendMessage(); !$event.shiftKey && $event.preventDefault()"
+                [disabled]="loading()"
+            ></textarea>
+            <button
+                (click)="toggleAudioListening()"
+                [class]="'flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-colors ' + (isListening() ? 'bg-red-500 hover:bg-red-600' : 'bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600')"
+                title="Gravar áudio"
+                [disabled]="loading()"
+            >
+                @if (isListening()) {
+                    <div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                } @else {
+                    <svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3Z M19 12a1 1 0 0 0-1 1a6 6 0 0 1-12 0 1 1 0 0 0-2 0a8 8 0 0 0 7 7.93V24h2v-2.07A8 8 0 0 0 20 13a1 1 0 0 0-1-1Z"/></svg>
+                }
+            </button>
+            <button
+                (click)="sendMessage()"
+                [disabled]="!userInput().trim() || loading()"
+                class="flex-shrink-0 w-11 h-11 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:bg-indigo-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                title="Enviar"
+            >
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="transform: rotate(90deg);"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.207 10.207l-5 5a1 1 0 0 1-1.414-1.414L13.086 12l-3.293-3.293a1 1 0 1 1 1.414-1.414l5 5a1 1 0 0 1 0 1.414z"/></svg>
+            </button>
+        </div>
+    </div>
+  </div>
+</div>
+}
+
+<style>
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+</style>

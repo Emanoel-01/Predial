@@ -1,0 +1,91 @@
+@if (isOpen()) {
+<div class="fixed inset-0 bg-black bg-opacity-75 z-40 flex justify-center items-center p-4" (click)="onClose()">
+  <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col p-0" (click)="$event.stopPropagation()">
+    <header class="p-6 border-b border-gray-700 flex justify-between items-center">
+      <h2 class="text-2xl font-bold text-gray-200 flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><path d="M5 3v4"/><path d="M19 17v4"/><path d="M12 3v4"/><path d="M5 17v4"/><path d="M19 3v4"/><path d="M12 17v4"/><path d="m12 15-2-3 2-3 2 3-2 3Z"/><path d="M19 15-2-3 2-3 2 3-2 3Z"/><path d="M5 15-2-3 2-3 2 3-2 3Z"/><path d="m12 8 2-3-2-3-2 3 2 3Z"/><path d="M19 8l2-3-2-3-2 3 2 3Z"/><path d="M5 8l2-3-2-3-2 3 2 3Z"/></svg>
+        Assistente de Diagnóstico e Correção
+      </h2>
+      <button (click)="onClose()" class="text-gray-400 hover:text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </header>
+    
+    <div class="flex-grow p-6 overflow-y-auto">
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="space-y-4">
+                <label class="block text-lg font-semibold text-gray-200">
+                    1. Descreva os Sintomas Observados
+                </label>
+                <textarea
+                    [ngModel]="symptomDescription()" 
+                    (ngModelChange)="symptomDescription.set($event)"
+                    placeholder="Ex: 'Mancha de umidade escura com bolhas na pintura da parede do quarto, próximo ao banheiro. A parede fica úmida ao toque.'"
+                    class="h-48 text-base w-full p-2 border bg-gray-700 border-gray-600 rounded-md text-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                ></textarea>
+                <button 
+                    (click)="getDiagnosticSuggestions()" 
+                    [disabled]="loadingSuggestions() || loadingCorrection() || !symptomDescription().trim()"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 text-base rounded-lg flex items-center justify-center transition-colors disabled:bg-gray-500"
+                >
+                    @if (loadingSuggestions()) {
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <span>Processando sintomas...</span>
+                    } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M12 18v-7.5"></path><path d="m8.5 14.5 3.5 3.5 3.5-3.5"></path></svg>
+                        <span>2. Analisar Sintomas</span>
+                    }
+                </button>
+                
+                @if (diagnosticSuggestions()) {
+                  <button
+                    (click)="getCorrectionPlan()"
+                    [disabled]="loadingCorrection() || loadingSuggestions()"
+                    class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-3 text-base rounded-lg flex items-center justify-center transition-colors disabled:bg-gray-500"
+                  >
+                    @if (loadingCorrection()) {
+                      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                      <span>Elaborando plano de correção...</span>
+                    } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M14 12v.01"/><path d="M6 12v.01"/><path d="M10 12v.01"/><path d="M18 12v.01"/><path d="M12 8.5V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2"/><path d="M12 15.5V18a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-2"/><rect width="20" height="12" x="2" y="6" rx="2"/></svg>
+                        <span>3. Indicar Tratamento</span>
+                    }
+                  </button>
+                }
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-200">Resultados da Análise:</h3>
+                    @if ((diagnosticSuggestions() || correctionPlan())) {
+                        <button (click)="generatePDF()"
+                                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded-lg text-sm flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                            PDF
+                        </button>
+                    }
+                </div>
+                
+                <div class="bg-gray-900 p-4 rounded-lg min-h-[300px] border border-gray-700 overflow-y-auto">
+                  @if (diagnosticSuggestions()) {
+                    <div class="prose prose-invert max-w-none" [innerHTML]="diagnosticSuggestions()"></div>
+                    @if (correctionPlan()) {
+                      <hr class="my-4 border-gray-700"/>
+                      <div class="prose prose-invert max-w-none" [innerHTML]="correctionPlan()"></div>
+                    }
+                  } @else {
+                     <p class="text-center text-gray-400 p-4">Os resultados da análise aparecerão aqui.</p>
+                  }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="p-4 border-t border-gray-700 bg-gray-900 text-center">
+         <p class="text-xs text-gray-400">
+            <i>Aviso: As recomendações são geradas por IA e devem ser validadas por um profissional habilitado com especialização em engenharia de manutenção predial.</i>
+        </p>
+    </div>
+  </div>
+</div>
+}

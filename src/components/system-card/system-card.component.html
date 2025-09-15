@@ -1,0 +1,202 @@
+<div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 overflow-hidden">
+  <div class="p-4 md:p-6 bg-gray-900 border-b border-gray-700">
+    <h3 class="text-2xl font-bold text-gray-200 flex items-center">
+      <span class="text-3xl mr-3">{{ system().icon }}</span>
+      {{ system().title }}
+    </h3>
+  </div>
+
+  <div class="divide-y divide-gray-700">
+    
+    <!-- ACCORDION ITEM: Tipologias -->
+    <div class="py-2 px-4 md:px-6">
+      <button (click)="togglePanel('tipologias')" class="accordion-trigger">
+        <h4 class="text-lg font-bold text-indigo-400 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+            Tipologias
+        </h4>
+        <svg [class.rotate-180]="activePanel() === 'tipologias'" class="h-6 w-6 text-gray-400 transform transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+      </button>
+      @if(activePanel() === 'tipologias') {
+        <div class="accordion-content animate-fade-in-down">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            @for (typology of system().tipologias; track typology.title) {
+              <div (click)="openTypologyModal(typology)" class="bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-colors cursor-pointer flex justify-between items-center">
+                <span class="text-sm font-medium text-gray-300">{{ typology.title }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- ACCORDION ITEM: Patologias -->
+    <div class="py-2 px-4 md:px-6">
+       <button (click)="togglePanel('patologias')" class="accordion-trigger">
+        <h4 class="text-lg font-bold text-indigo-400 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            Patologias por Tipologia
+        </h4>
+        <svg [class.rotate-180]="activePanel() === 'patologias'" class="h-6 w-6 text-gray-400 transform transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+      </button>
+      @if(activePanel() === 'patologias') {
+        <div class="accordion-content animate-fade-in-down">
+          <div class="mb-4 flex flex-wrap gap-2">
+            <button (click)="setPathologyFilter(null)" [class]="'px-3 py-1 text-sm rounded-full transition ' + (!pathologyFilter() ? 'bg-indigo-500 text-white' : 'bg-gray-700 hover:bg-gray-600')">
+              Todas
+            </button>
+            @for(filter of typologyFilters(); track filter.title) {
+              <button (click)="setPathologyFilter(filter.title)" [class]="'px-3 py-1 text-sm rounded-full transition ' + (pathologyFilter() === filter.title ? 'bg-indigo-500 text-white' : 'bg-gray-700 hover:bg-gray-600')">
+                {{ filter.title }}
+              </button>
+            }
+          </div>
+          <div class="space-y-4">
+            @for(item of typologiesWithPathologies(); track item.typology.title) {
+              <div class="bg-gray-900/70 rounded-lg shadow-md transition-all duration-300">
+                <h5 class="font-bold text-gray-200 bg-gray-700/50 px-4 py-2 rounded-t-lg">{{ item.typology.title }}</h5>
+                <div class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  @for(pathology of item.pathologies; track pathology.title) {
+                    <div class="bg-gray-700 p-3 rounded-lg flex justify-between items-center hover:bg-gray-600 transition-colors cursor-pointer" (click)="openPathologyModal(pathology)">
+                      <span class="text-sm font-medium text-gray-300">{{ pathology.title }}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 flex-shrink-0 ml-2" [attr.title]="pathology.title + ' - ' + pathology.sintomas"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- ACCORDION ITEM: Tecnologias 4.0 -->
+    <div class="py-2 px-4 md:px-6">
+        <button (click)="togglePanel('tecnologias')" class="accordion-trigger">
+            <h4 class="text-lg font-bold text-indigo-400 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M12 6V3m0 18v-3m6-9h3m-3 6h3M9 6h6M9 18h6" /><path stroke-linecap="round" stroke-linejoin="round" d="M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                Tecnologias 4.0 Aplicadas
+            </h4>
+            <svg [class.rotate-180]="activePanel() === 'tecnologias'" class="h-6 w-6 text-gray-400 transform transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+        </button>
+        @if(activePanel() === 'tecnologias') {
+            <div class="accordion-content animate-fade-in-down">
+                <div class="space-y-4">
+                @for (tech of system().tecnologias; track tech.title) {
+                  <div class="bg-gray-700/50 p-4 rounded-lg" title="{{ tech.title }} - {{ tech.desc }}">
+                    <h5 class="font-bold text-gray-200 flex items-center mb-1">
+                      <span class="text-2xl mr-3">{{ tech.icon }}</span>
+                      {{ tech.title }}
+                    </h5>
+                    <p class="text-gray-400 text-sm pl-10">{{ tech.desc }}</p>
+                  </div>
+                }
+              </div>
+            </div>
+        }
+    </div>
+
+    <!-- ACCORDION ITEM: Cronogramas -->
+    <div class="py-2 px-4 md:px-6">
+        <button (click)="togglePanel('cronogramas')" class="accordion-trigger">
+            <h4 class="text-lg font-bold text-indigo-400 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                Cronograma de Manutenção
+            </h4>
+            <svg [class.rotate-180]="activePanel() === 'cronogramas'" class="h-6 w-6 text-gray-400 transform transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+        </button>
+        @if(activePanel() === 'cronogramas') {
+            <div class="accordion-content animate-fade-in-down">
+                <h5 class="text-base font-semibold text-gray-300 mb-3">Selecione uma tipologia:</h5>
+                <div class="mb-4 flex flex-wrap gap-2">
+                    @for (typology of system().tipologias; track typology.title) {
+                        <button 
+                            (click)="showMaintenanceSchedule(typology.title)" 
+                            [class]="'px-3 py-1 text-sm rounded-full transition ' + (activeScheduleKey() === typology.title ? 'bg-indigo-500 text-white' : 'bg-gray-700 hover:bg-gray-600')">
+                            {{ typology.title }}
+                        </button>
+                    }
+                </div>
+                @if (activeScheduleKey()) {
+                    <div class="mt-4 transition-opacity duration-500">
+                        <app-maintenance-table [schedule]="activeSchedule()" />
+                    </div>
+                } @else {
+                    <p class="text-gray-400 italic text-center p-4">Selecione uma tipologia acima para ver o cronograma de manutenção.</p>
+                }
+            </div>
+        }
+    </div>
+  </div>
+</div>
+
+<app-details-modal
+  [isOpen]="modalData().isOpen"
+  [title]="modalTitle()"
+  (closeModal)="closeModal()"
+>
+  @switch (modalData().type) {
+    @case ('typology') {
+      @if (modalData().data; as typology) {
+        <div class="space-y-4">
+          <div>
+            <h4 class="font-bold text-gray-200">Definição</h4>
+            <p>{{ typology.definicao }}</p>
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-200">Principais Componentes</h4>
+            <p>{{ typology.componentes }}</p>
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-200">Aplicações Comuns</h4>
+            <p>{{ typology.aplicacoes }}</p>
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-200">Vantagens</h4>
+            <p>{{ typology.vantagens }}</p>
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-200">Desvantagens</h4>
+            <p>{{ typology.desvantagens }}</p>
+          </div>
+        </div>
+      }
+    }
+    @case ('pathology') {
+      <app-pathology-modal-content [pathology]="modalData().data!" [userProfile]="userProfile()" />
+    }
+  }
+</app-details-modal>
+
+<style>
+  .accordion-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  .accordion-content {
+    padding-top: 0.5rem;
+    padding-bottom: 1rem;
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in-down {
+    animation: fadeInDown 0.4s ease-out forwards;
+  }
+</style>

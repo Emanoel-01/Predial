@@ -1,0 +1,237 @@
+@if (isOpen()) {
+<div class="fixed inset-0 bg-black bg-opacity-75 z-40 flex justify-center items-center p-4" (click)="onClose()">
+  <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col" (click)="$event.stopPropagation()">
+    <header class="flex justify-between items-center p-6 border-b border-gray-700">
+      <h2 class="text-2xl font-bold text-gray-200">Configurações de Acesso</h2>
+      <button (click)="onClose()" class="text-gray-400 hover:text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </header>
+
+    @if(editableProfile(); as profile) {
+    <main class="flex-grow overflow-y-auto">
+      <div class="border-b border-gray-700 px-6">
+        <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+          <button (click)="setActiveTab('pessoal')"
+                  [class]="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'pessoal' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-gray-400 hover:text-white hover:border-gray-500')">
+            Dados Pessoais
+          </button>
+          <button (click)="setActiveTab('orgao')"
+                  [class]="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'orgao' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-gray-400 hover:text-white hover:border-gray-500')">
+            Dados do Órgão
+          </button>
+           <button (click)="setActiveTab('timbrado')"
+                  [class]="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (activeTab() === 'timbrado' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-gray-400 hover:text-white hover:border-gray-500')">
+            Papel Timbrado
+          </button>
+        </nav>
+      </div>
+
+      <div class="p-6">
+        @if (activeTab() === 'pessoal') {
+          <div class="space-y-6 animate-fade-in">
+            <h3 class="text-lg font-semibold text-gray-200">Dados Pessoais do Profissional</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label for="fullName" class="block text-sm font-medium text-gray-300">Nome Completo *</label>
+                <input type="text" id="fullName" [ngModel]="profile.fullName" (ngModelChange)="updateProfile('fullName', $event)" (blur)="markAsTouched('fullName')" [class]="'mt-1 block w-full input-field ' + (touched()['fullName'] && !profile.fullName.trim() ? 'border-red-500' : '')">
+                @if (touched()['fullName'] && !profile.fullName.trim()) {
+                  <p class="text-xs text-red-500 mt-1">O nome completo é obrigatório.</p>
+                }
+              </div>
+              <div>
+                <label for="profession" class="block text-sm font-medium text-gray-300">Profissão *</label>
+                <select id="profession" [ngModel]="profile.profession" (ngModelChange)="updateProfile('profession', $event)" (blur)="markAsTouched('profession')" [class]="'mt-1 block w-full input-field ' + (touched()['profession'] && !profile.profession ? 'border-red-500' : '')">
+                  <option value="" disabled>Selecione uma opção</option>
+                  @for (prof of professions; track prof) {
+                    <option [value]="prof">{{ prof }}</option>
+                  }
+                </select>
+                @if (touched()['profession'] && !profile.profession) {
+                  <p class="text-xs text-red-500 mt-1">A profissão é obrigatória.</p>
+                }
+              </div>
+              <div>
+                <label for="professionalRegistry" class="block text-sm font-medium text-gray-300">Nº de Registro Profissional</label>
+                <input type="text" id="professionalRegistry" [ngModel]="profile.professionalRegistry" (ngModelChange)="updateProfile('professionalRegistry', $event)" class="mt-1 block w-full input-field">
+              </div>
+              <div>
+                <label for="registrationId" class="block text-sm font-medium text-gray-300">Matrícula</label>
+                <input type="text" id="registrationId" [ngModel]="profile.registrationId" (ngModelChange)="updateProfile('registrationId', $event)" class="mt-1 block w-full input-field">
+              </div>
+              <div>
+                <label for="role" class="block text-sm font-medium text-gray-300">Função</label>
+                <input type="text" id="role" [ngModel]="profile.role" (ngModelChange)="updateProfile('role', $event)" class="mt-1 block w-full input-field">
+              </div>
+            </div>
+          </div>
+        }
+        
+        @if (activeTab() === 'orgao') {
+          <div class="space-y-6 animate-fade-in">
+              <h3 class="text-lg font-semibold text-gray-200 mb-4">Dados do Órgão Público</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                  <label for="publicAgencyName" class="block text-sm font-medium text-gray-300">Nome do Órgão Público *</label>
+                  <input type="text" id="publicAgencyName" [ngModel]="profile.publicAgencyName" (ngModelChange)="updateProfile('publicAgencyName', $event)" (blur)="markAsTouched('publicAgencyName')" [class]="'mt-1 block w-full input-field ' + (touched()['publicAgencyName'] && !profile.publicAgencyName.trim() ? 'border-red-500' : '')">
+                  @if (touched()['publicAgencyName'] && !profile.publicAgencyName.trim()) {
+                    <p class="text-xs text-red-500 mt-1">O nome do órgão é obrigatório.</p>
+                  }
+                </div>
+                <div class="md:col-span-2">
+                  <label for="publicAgencyAddress" class="block text-sm font-medium text-gray-300">Endereço do Órgão *</label>
+                  <input type="text" id="publicAgencyAddress" [ngModel]="profile.publicAgencyAddress" (ngModelChange)="updateProfile('publicAgencyAddress', $event)" (blur)="markAsTouched('publicAgencyAddress')" [class]="'mt-1 block w-full input-field ' + (touched()['publicAgencyAddress'] && !profile.publicAgencyAddress.trim() ? 'border-red-500' : '')">
+                  @if (touched()['publicAgencyAddress'] && !profile.publicAgencyAddress.trim()) {
+                    <p class="text-xs text-red-500 mt-1">O endereço do órgão é obrigatório.</p>
+                  }
+                </div>
+                <div>
+                  <label for="publicAgencyCNPJ" class="block text-sm font-medium text-gray-300">CNPJ</label>
+                  <input type="text" id="publicAgencyCNPJ" [ngModel]="profile.publicAgencyCNPJ" (input)="formatCnpj($event)" placeholder="00.000.000/0000-00" [class]="'mt-1 block w-full input-field ' + (touched()['publicAgencyCNPJ'] && !isCnpjValid() ? 'border-red-500' : '')">
+                  @if (touched()['publicAgencyCNPJ'] && !isCnpjValid()) {
+                    <p class="text-xs text-red-500 mt-1">Formato de CNPJ inválido.</p>
+                  }
+                </div>
+              </div>
+          </div>
+        }
+
+        @if (activeTab() === 'timbrado' && profile.letterhead; as letterhead) {
+          <div class="animate-fade-in grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="space-y-6">
+              <!-- LOGO SECTION -->
+              <div class="p-4 bg-gray-700/50 rounded-lg">
+                <h4 class="text-base font-semibold text-gray-200 mb-3">Logotipo</h4>
+                <div class="flex items-center gap-4">
+                  <div>
+                    <label for="logo-upload" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg cursor-pointer hover:bg-indigo-700 transition-colors inline-block text-sm">
+                      Upload (.jpg/.png)
+                      <input id="logo-upload" type="file" class="sr-only" (change)="onLogoSelected($event)" accept="image/jpeg, image/png">
+                    </label>
+                    @if (letterhead.logo) {
+                      <button (click)="removeLogo()" class="ml-2 bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors text-sm">Remover</button>
+                    }
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <label class="block text-sm font-medium text-gray-300">Posição:</label>
+                    <button (click)="updateLetterhead('logoPosition', 'left')" [class]="'p-2 rounded ' + (letterhead.logoPosition === 'left' ? 'bg-indigo-600 text-white' : 'bg-gray-600 hover:bg-gray-500')">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><line x1="14" y1="4" x2="21" y2="4"></line><line x1="14" y1="8" x2="21" y2="8"></line></svg>
+                    </button>
+                    <button (click)="updateLetterhead('logoPosition', 'right')" [class]="'p-2 rounded ' + (letterhead.logoPosition === 'right' ? 'bg-indigo-600 text-white' : 'bg-gray-600 hover:bg-gray-500')">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="3" width="7" height="7"></rect><line x1="3" y1="4" x2="10" y2="4"></line><line x1="3" y1="8" x2="10" y2="8"></line></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- HEADER SECTION -->
+              <div class="p-4 bg-gray-700/50 rounded-lg space-y-4">
+                <h4 class="text-base font-semibold text-gray-200">Cabeçalho</h4>
+                <select [ngModel]="letterhead.headerText" (ngModelChange)="updateLetterhead('headerText', $event)" class="input-field w-full">
+                    @for(option of headerTextOptions(); track option) {
+                        <option [value]="option">{{ option }}</option>
+                    }
+                </select>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  <select [ngModel]="letterhead.headerFontFamily" (ngModelChange)="updateLetterhead('headerFontFamily', $event)" class="input-field w-full">
+                    @for(font of fontFamilies; track font.value) {
+                      <option [value]="font.value">{{ font.label }}</option>
+                    }
+                  </select>
+                  <select [ngModel]="letterhead.headerFontSize" (ngModelChange)="updateLetterhead('headerFontSize', $event)" class="input-field w-full">
+                    @for(size of fontSizes; track size) {
+                      <option [value]="size">{{ size }}</option>
+                    }
+                  </select>
+                  <input type="color" [ngModel]="letterhead.headerTextColor" (ngModelChange)="updateLetterhead('headerTextColor', $event)" class="input-field w-full h-[38px] p-1">
+                  <div class="flex items-center gap-1 bg-gray-800 p-1 rounded-md">
+                    <button (click)="updateLetterhead('headerTextAlign', 'left')" [class]="'w-full p-1.5 rounded ' + (letterhead.headerTextAlign === 'left' ? 'bg-indigo-600' : 'hover:bg-gray-700')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="mx-auto"><path d="M3 4h18v2H3V4zm0 14h12v2H3v-2zm0-7h18v2H3v-2z"></path></svg></button>
+                    <button (click)="updateLetterhead('headerTextAlign', 'center')" [class]="'w-full p-1.5 rounded ' + (letterhead.headerTextAlign === 'center' ? 'bg-indigo-600' : 'hover:bg-gray-700')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="mx-auto"><path d="M3 4h18v2H3V4zm3 14h12v2H6v-2zm-3-7h18v2H3v-2z"></path></svg></button>
+                    <button (click)="updateLetterhead('headerTextAlign', 'right')" [class]="'w-full p-1.5 rounded ' + (letterhead.headerTextAlign === 'right' ? 'bg-indigo-600' : 'hover:bg-gray-700')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="mx-auto"><path d="M3 4h18v2H3V4zm6 14h12v2H9v-2zm-6-7h18v2H3v-2z"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FOOTER SECTION -->
+              <div class="p-4 bg-gray-700/50 rounded-lg space-y-4">
+                <h4 class="text-base font-semibold text-gray-200">Rodapé</h4>
+                <textarea [ngModel]="letterhead.footerText" (ngModelChange)="updateLetterhead('footerText', $event)" rows="2" class="input-field w-full"></textarea>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  <select [ngModel]="letterhead.footerFontFamily" (ngModelChange)="updateLetterhead('footerFontFamily', $event)" class="input-field w-full">
+                    @for(font of fontFamilies; track font.value) {
+                      <option [value]="font.value">{{ font.label }}</option>
+                    }
+                  </select>
+                  <select [ngModel]="letterhead.footerFontSize" (ngModelChange)="updateLetterhead('footerFontSize', $event)" class="input-field w-full">
+                    @for(size of fontSizes; track size) {
+                      <option [value]="size">{{ size }}</option>
+                    }
+                  </select>
+                  <input type="color" [ngModel]="letterhead.footerTextColor" (ngModelChange)="updateLetterhead('footerTextColor', $event)" class="input-field w-full h-[38px] p-1">
+                  <div class="flex items-center gap-1 bg-gray-800 p-1 rounded-md">
+                    <button (click)="updateLetterhead('footerTextAlign', 'left')" [class]="'w-full p-1.5 rounded ' + (letterhead.footerTextAlign === 'left' ? 'bg-indigo-600' : 'hover:bg-gray-700')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="mx-auto"><path d="M3 4h18v2H3V4zm0 14h12v2H3v-2zm0-7h18v2H3v-2z"></path></svg></button>
+                    <button (click)="updateLetterhead('footerTextAlign', 'center')" [class]="'w-full p-1.5 rounded ' + (letterhead.footerTextAlign === 'center' ? 'bg-indigo-600' : 'hover:bg-gray-700')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="mx-auto"><path d="M3 4h18v2H3V4zm3 14h12v2H6v-2zm-3-7h18v2H3v-2z"></path></svg></button>
+                    <button (click)="updateLetterhead('footerTextAlign', 'right')" [class]="'w-full p-1.5 rounded ' + (letterhead.footerTextAlign === 'right' ? 'bg-indigo-600' : 'hover:bg-gray-700')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="mx-auto"><path d="M3 4h18v2H3V4zm6 14h12v2H9v-2zm-6-7h18v2H3v-2z"></path></svg></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <h4 class="text-base font-semibold text-gray-200 text-center">Pré-visualização</h4>
+              <div class="bg-white shadow-lg rounded-md aspect-[210/297] w-full mx-auto flex flex-col justify-between border" style="padding: 10.1% 9.5% 6.7%;">
+                <!-- Header Preview -->
+                <div class="border-b border-gray-300 pb-2">
+                  <div class="flex items-center" [class.flex-row-reverse]="letterhead.logoPosition === 'right'">
+                    @if(letterhead.logo) {
+                      <img [src]="letterhead.logo" alt="logo" class="max-h-16 max-w-[120px]" [class.mr-4]="letterhead.logoPosition === 'left'" [class.ml-4]="letterhead.logoPosition === 'right'">
+                    }
+                    <div class="flex-grow whitespace-pre-wrap"
+                         [style.font-family]="letterhead.headerFontFamily" 
+                         [style.font-size]="letterhead.headerFontSize" 
+                         [style.color]="letterhead.headerTextColor"
+                         [style.text-align]="letterhead.headerTextAlign"
+                         [innerHTML]="formattedHeaderText()">
+                    </div>
+                  </div>
+                </div>
+                <!-- Body Preview -->
+                <div class="flex-grow my-4 text-[9px]">
+                  <div class="w-full h-2.5 bg-gray-200 rounded my-1.5"></div><div class="w-full h-1.5 bg-gray-200 rounded"></div><div class="w-3/4 h-1.5 bg-gray-200 rounded mt-0.5"></div><div class="w-full h-1.5 bg-gray-200 rounded mt-2.5"></div><div class="w-full h-1.5 bg-gray-200 rounded mt-0.5"></div><div class="w-1/2 h-1.5 bg-gray-200 rounded mt-0.5"></div>
+                </div>
+                <!-- Footer Preview -->
+                <div class="border-t border-gray-300 pt-2">
+                   <div class="text-center whitespace-pre-wrap" 
+                    [style.font-family]="letterhead.footerFontFamily" 
+                    [style.font-size]="letterhead.footerFontSize" 
+                    [style.color]="letterhead.footerTextColor"
+                    [style.text-align]="letterhead.footerTextAlign"
+                    [innerHTML]="formattedFooterText()">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </main>
+
+    <footer class="p-4 bg-gray-900 border-t border-gray-700 flex justify-end">
+      <button (click)="onSave()" [disabled]="!isFormValid()" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-500 disabled:cursor-not-allowed">Salvar</button>
+    </footer>
+    }
+  </div>
+</div>
+}
+
+<style>
+  .input-field {
+    @apply px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+</style>
